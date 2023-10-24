@@ -35,31 +35,46 @@ def handle_hello():
 @app.route('/member', methods=['POST'])
 def add_member():
     body = request.get_json(silent=True)
+    
     if body is None:
-        return jsonify ({'msg': 'Debes enviar información en el body'}), 400
+        return jsonify({'msg': 'Debes enviar información en el body'}), 400
     if 'first_name' not in body:
-        return jsonify ({'msg': 'El campo first_name es requerido'}), 400
+        return jsonify({'msg': 'El campo first_name es requerido'}), 400
     if 'age' not in body:
-        return jsonify ({'msg': 'El campo age es requerido'}), 400
+        return jsonify({'msg': 'El campo age es requerido'}), 400
     if 'lucky_numbers' not in body:
-        return jsonify ({'msg': 'El campo lucky_numbers es requerido'}), 400
-    id_member = jackson_family._generateId()
-    if 'id_member' in body:
-        id_member = body['id_member']
+        return jsonify({'msg': 'El campo lucky_numbers es requerido'}), 400
+    # Verificar si se proporciona un id específico en el cuerpo de la solicitud
+    if 'id' in body:
+        id_member = body['id']
+    else:
+        # Generar un id aleatorio si no se proporciona
+        id_member = jackson_family._generateId()
+
     new_member = {
-        'id' : id_member,
+        'id': id_member,
         'first_name': body['first_name'],
-        'last_name' : jackson_family.last_name,
+        'last_name': jackson_family.last_name,
         'age': body['age'],
         'lucky_numbers': body['lucky_numbers']
     }
+
     jackson_family.add_member(new_member)
-    return jsonify({'new_member':new_member}),200
+    return jsonify({'new_member': new_member}), 200
+
 
 @app.route('/member/<int:id>', methods=['GET'])
 def get_member(id):
     member = jackson_family.get_member(id)
-    return jsonify({'member_id':member}),200
+
+    if member is not None:
+        return jsonify({
+            "id": member["id"],
+            "first_name": member["first_name"],
+            "last_name": member["last_name"],
+            "age": member["age"],
+            "lucky_numbers": member["lucky_numbers"]
+        }), 200
 
     
 
